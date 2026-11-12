@@ -1,0 +1,34 @@
+[
+    {
+        "application_id": "106dc863-e725-4513-9fdc-0c9074dfd87c",
+        "employee_id": "EMP001",
+        "start_date": "2026-11-16",
+        "end_date": "2026-11-18",
+        "days_requested": 3,
+        "status": "approved"
+    },
+    {
+        "application_id": "20ac345a-3da2-42d0-92d8-af320ab12d8a",
+        "employee_id": "EMP001",
+        "start_date": "2026-11-10",
+        "end_date": "2026-11-10",
+        "days_requested": 1,
+        "status": "rejected"
+    },
+    {
+        "application_id": "f2970051-ddee-4467-b6ff-aabe07ab685c",
+        "employee_id": "EMP002",
+        "start_date": "2026-11-16",
+        "end_date": "2026-11-17",
+        "days_requested": 2,
+        "status": "approved"
+    },
+    {
+        "application_id": "5dcf07bf-116f-465b-a88e-b863aefa7006",
+        "employee_id": "EMP002",
+        "start_date": "2026-11-21",
+        "end_date": "2026-11-23",
+        "days_requested": 1,
+        "status": "pending"
+    }
+]

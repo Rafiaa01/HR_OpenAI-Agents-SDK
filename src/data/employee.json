@@ -1,0 +1,17 @@
+{
+    "EMP001": {
+        "name": "Ali Khan",
+        "department": "Engineering",
+        "annual_leave_balance": 17
+    },
+    "EMP002": {
+        "name": "Sara Ahmed",
+        "department": "Human Resources",
+        "annual_leave_balance": 13
+    },
+    "EMP003": {
+        "name": "Usman Malik",
+        "department": "Finance",
+        "annual_leave_balance": 10
+    }
+}
