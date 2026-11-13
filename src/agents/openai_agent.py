@@ -5,6 +5,7 @@ from pathlib import Path
 from agents.mcp import MCPServerStdio
 
 from agents import Agent
+from src.agents.guadrials import hr_domain_guardrail
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -57,4 +58,5 @@ triage_agent = Agent(
     Do not answer HR questions yourself.
     """,
     handoffs=[hr_agent],     
+    input_guardrails=[hr_domain_guardrail],
 )
