@@ -3,12 +3,13 @@ import asyncio
 
 from dotenv import load_dotenv
 
-from agents import InputGuardrailTripwireTriggered, Runner
+from agents import InputGuardrailTripwireTriggered, Runner, set_trace_processors, trace
 from src.agents.openai_agent import mcp_server, triage_agent
+from src.agents.tracing import LocalTracingProcessor
 
 load_dotenv()
 
-
+set_trace_processors([LocalTracingProcessor()])
 async def main():
     async with mcp_server:
 
@@ -20,17 +21,27 @@ async def main():
             print(f"- {tool.name}")
 
         # Run the Triage Agent
-        try:
-            result = await Runner.run(
-                triage_agent,
-                "Check the leave balance for employee EMP001."
-            )
+        while True:
+            user_query = input("\nYou: ").strip()
 
-            print("\nAgent response:")
-            print(result.final_output)
+            if user_query.lower() == "exit":
+                print("Exiting HR Assistant...")
+                break
 
-        except InputGuardrailTripwireTriggered:
-            print("\nRequest blocked: Only HR-related queries are allowed.")
+            if not user_query:
+                continue
+
+            try:
+                with trace("HR Leave Management Workflow"):
+                    result = await Runner.run(
+                        triage_agent,
+                        user_query
+                    )
+
+                    print("\nAssistant:", result.final_output)
+
+            except InputGuardrailTripwireTriggered:
+                print("\nRequest blocked: Only HR-related queries are allowed.")
 
 
 if __name__ == "__main__":
