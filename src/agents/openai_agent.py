@@ -20,6 +20,10 @@ mcp_server = MCPServerStdio(
 
 hr_agent = Agent(
     name="HR Leave Assistant",
+     handoff_description=(
+        "Handles employee leave balances, leave applications, "
+        "and leave request reviews using HR MCP tools."
+    ),
     instructions="""
     You are an HR leave management assistant.
 
@@ -32,4 +36,25 @@ hr_agent = Agent(
     Always use the MCP tools when accessing HR data.
     """,
     mcp_servers=[mcp_server],
+
+)
+triage_agent = Agent(
+    name="Triage Agent",
+    instructions="""
+    You are the first point of contact for user requests.
+
+    Your job is to identify HR leave management requests
+    and hand them off to the HR Leave Assistant.
+
+    For questions about:
+    - Leave balances
+    - Applying for leave
+    - Pending leave requests
+    - Reviewing leave applications
+
+    Always hand off to the HR Leave Assistant.
+
+    Do not answer HR questions yourself.
+    """,
+    handoffs=[hr_agent],     
 )

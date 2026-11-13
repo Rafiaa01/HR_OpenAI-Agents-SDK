@@ -3,14 +3,15 @@ import asyncio
 
 from dotenv import load_dotenv
 
-from agents import Runner
-from src.agents.openai_agent import hr_agent, mcp_server
+from agents import InputGuardrailTripwireTriggered, Runner
+from src.agents.openai_agent import mcp_server, triage_agent
 
 load_dotenv()
 
 
 async def main():
     async with mcp_server:
+
         # Check which tools the MCP server exposes
         tools = await mcp_server.list_tools()
 
@@ -18,14 +19,18 @@ async def main():
         for tool in tools:
             print(f"- {tool.name}")
 
-        # Send a query to the HR agent
-        result = await Runner.run(
-            hr_agent,
-            "Check the leave balance for employee EMP001."
-        )
+        # Run the Triage Agent
+        try:
+            result = await Runner.run(
+                triage_agent,
+                "Check the leave balance for employee EMP001."
+            )
 
-        print("\nAgent response:")
-        print(result.final_output)
+            print("\nAgent response:")
+            print(result.final_output)
+
+        except InputGuardrailTripwireTriggered:
+            print("\nRequest blocked: Only HR-related queries are allowed.")
 
 
 if __name__ == "__main__":
