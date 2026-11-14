@@ -5,6 +5,10 @@ from src.mcp_server.app import mcp
 
 if __name__ == "__main__":
     try:
-        mcp.run(transport="stdio")
+        mcp.run(
+        transport="streamable-http",
+        host="127.0.0.1",
+        port=8001,
+    )
     except (KeyboardInterrupt, asyncio.CancelledError):
         print("\nServer stopped.")

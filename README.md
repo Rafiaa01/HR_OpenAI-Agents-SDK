@@ -1,62 +1,74 @@
-# HR Leave Management MCP Assistant
+# HR Leave Management Agent — OpenAI Agents SDK + MCP
 
-## Overview
-A Python-based HR Leave Management system built using **FastMCP, Model Context Protocol (MCP), and FastAPI**. It provides leave management functionality through MCP tools, resources, and prompts, with a separate HTTP API for testing through Postman.
+## Project Overview
 
-## Features
+An AI-powered HR Leave Management Assistant built using the **OpenAI Agents SDK** and an existing **FastMCP server**.
 
-- **MCP Server:** Built using FastMCP with STDIO transport.
-- **Resource:** Exposes the annual leave policy through `hr://policies/employee-handbook`.
-- **Prompt:** `leave_application_assistant` provides reusable instructions for checking policy, verifying leave balance, collecting dates, and requesting confirmation before submission.
-- **MCP Tools:**
-  - `get_leave_balance` – Check employee leave balance.
-  - `apply_leave` – Submit leave applications.
-  - `get_pending_leave_requests` – Retrieve pending applications.
-  - `review_leave_application` – Approve or reject applications.
-- **Validation:** Checks employee IDs, date ranges, available balance, and overlapping leave requests.
-- **Data Persistence:** Uses JSON files to store fictional employee records, leave balances, and leave applications.
-- **Approval Workflow:** Deducts leave balance only after manager approval.
-- **FastAPI Integration:** Provides HTTP endpoints protected by API-key authentication.
+The system uses multiple agents to handle employee leave-related queries, execute MCP tools, validate requests through guardrails, and record execution traces.
 
-## API Endpoints
+## Technologies Used
 
-| Method | Endpoint | Purpose |
+- Python
+- OpenAI Agents SDK
+- MCP Python SDK
+- FastMCP
+- Pydantic
+- python-dotenv
+- JSON-based storage
+
+## Architecture
+
+The project uses a two-agent architecture:
+
+1. **Triage Agent:** Receives user queries, checks the HR-domain guardrail, and routes HR-related requests to the specialist agent.
+2. **HR Leave Assistant:** Connects to the existing HR MCP server and executes the appropriate tools.
+
+The MCP server exposes the following tools:
+
+- `check_leave_balance`
+- `submit_leave_application`
+- `get_pending_leave_requests`
+- `review_leave_application`
+
+The server also provides an employee handbook resource and a leave application prompt.
+
+## Implemented Features
+
+### 1. MCP Server Integration
+
+- Connected the existing FastMCP server using `MCPServerStdio`.
+- Configured the server to run as a subprocess.
+- Discovered and exposed MCP tools to the HR Leave Assistant.
+- Used `Runner.run()` to execute agent workflows.
+
+### 2. Multi-Agent Architecture and Handoffs
+
+- Created a Triage Agent and an HR Leave Assistant.
+- Configured handoffs using `handoffs=[hr_agent]`.
+- Enabled the Triage Agent to delegate HR-related tasks to the specialist agent.
+
+### 3. Input Guardrails
+
+- Implemented an HR-domain input guardrail.
+- Allowed HR-related queries.
+- Blocked unrelated requests using a guardrail tripwire.
+- Handled `InputGuardrailTripwireTriggered` exceptions.
+
+### 4. Local Tracing
+
+- Implemented a custom `LocalTracingProcessor`.
+- Recorded execution events in `src/agents/traces.jsonl`.
+- Captured agent execution, guardrail results, handoffs, MCP tool calls, and token usage.
+- Used `set_trace_processors()` to configure local tracing.
+
+### 5. End-to-End Testing
+
+Successfully tested the following scenarios:
+
+| Test | Expected behavior | Result |
 |---|---|---|
-| GET | `/employees/{employee_id}/leave-balance` | Check leave balance |
-| POST | `/leave/apply` | Submit leave application |
-| GET | `/manager/leave-requests` | View pending requests |
-| POST | `/manager/leave-requests/{application_id}/review` | Approve/reject requests |
+| Single tool call | Check employee leave balance | Passed |
+| Multiple tool calls | Check balance and pending requests | Passed |
+| Guardrail validation | Block unrelated requests | Passed |
 
-## Technologies
-
-Python · FastMCP · MCP · FastAPI · Pydantic · JSON · MCP Inspector · Postman
-
-## Setup and Testing
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Run FastAPI:
-
-```bash
-uvicorn application:application --reload
-```
-
-API documentation:
-
-`http://127.0.0.1:8000/docs`
-
-Run MCP Inspector:
-
-```bash
-fastmcp dev inspector src/mcp_server/server.py
-```
-
-Use MCP Inspector to test resources, prompts, and tools, and Postman to test the HTTP endpoints.
-
-## Key Concepts
-
-Tools vs. Resources vs. Prompts · FastMCP decorators · Resource URIs · STDIO transport · MCP Inspector · Input validation · JSON persistence · Leave approval workflows.
+**
