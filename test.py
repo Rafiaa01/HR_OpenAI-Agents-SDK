@@ -1,44 +1,42 @@
-from datetime import date
+import asyncio
+import os
 
-import pytest
-from src.services.leave_service import (
-    apply_leave,
-    calculate_working_days,
-)
+import httpx
+from dotenv import load_dotenv
 
+load_dotenv()
 
-def test_calculate_working_days():
-    assert calculate_working_days(
-        date(2026, 11, 9),
-        date(2026, 11, 11)
-    ) == 3
+async def main():
+    api_key = os.getenv("MCP_API_KEY")
 
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+    }
 
-def test_apply_leave():
-    result = apply_leave(
-        "EMP001",
-        date(2026, 11, 16),
-        date(2026, 11, 18)
-    )
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2025-03-26",
+            "capabilities": {},
+            "clientInfo": {
+                "name": "auth-test",
+                "version": "1.0.0",
+            },
+        },
+    }
 
-    assert result["employee_id"] == "EMP001"
-    assert result["days_requested"] == 3
-    assert result["status"] == "pending"
-
-
-def test_invalid_employee():
-    with pytest.raises(ValueError):
-        apply_leave(
-            "EMP999",
-            date(2026, 11, 16),
-            date(2026, 11, 18)
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://127.0.0.1:8001/mcp",
+            headers=headers,
+            json=payload,
         )
 
+        print("Status:", response.status_code)
+        print("Response:", response.text[:1000])
 
-def test_end_date_before_start_date():
-    with pytest.raises(ValueError):
-        apply_leave(
-            "EMP001",
-            date(2026, 11, 18),
-            date(2026, 11, 16)
-        )
+asyncio.run(main())

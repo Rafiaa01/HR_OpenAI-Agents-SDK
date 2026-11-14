@@ -1,27 +1,25 @@
-
 import sys
 from pathlib import Path
 
-from agents.mcp import MCPServerStdio
+from agents.mcp import MCPServerStreamableHttp
 
 from agents import Agent
 from src.agents.guadrials import hr_domain_guardrail
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-mcp_server = MCPServerStdio(
+mcp_server = MCPServerStreamableHttp(
     name="HR Leave Management MCP Server",
     params={
         "command": sys.executable,
-        "args": ["-m", "src.mcp_server.server"],
-        "cwd": str(PROJECT_ROOT),
+        "url": "http://127.0.0.1:8001/mcp",
     },
     cache_tools_list=True,
 )
 
 hr_agent = Agent(
     name="HR Leave Assistant",
-     handoff_description=(
+    handoff_description=(
         "Handles employee leave balances, leave applications, "
         "and leave request reviews using HR MCP tools."
     ),
@@ -37,7 +35,6 @@ hr_agent = Agent(
     Always use the MCP tools when accessing HR data.
     """,
     mcp_servers=[mcp_server],
-
 )
 triage_agent = Agent(
     name="Triage Agent",
@@ -57,6 +54,6 @@ triage_agent = Agent(
 
     Do not answer HR questions yourself.
     """,
-    handoffs=[hr_agent],     
+    handoffs=[hr_agent],
     input_guardrails=[hr_domain_guardrail],
 )
